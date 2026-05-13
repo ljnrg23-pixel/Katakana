@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f3ea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Katakana Dash" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Katakana Dash</title>
+    <style>
+:root {
+  color-scheme: light;
+  --paper: #f7f3ea;
+  --ink: #202124;
+  --muted: #6d675f;
+  --line: #d9d1c3;
+  --panel: #fffaf1;
+  --accent: #24786d;
+  --accent-dark: #155b53;
+  --plum: #8b4762;
+  --gold: #c48424;
+  --mist: #dde9e5;
+  --wrong: #b34545;
+  --right: #24786d;
+  --shadow: 0 18px 45px rgba(43, 35, 22, 0.14);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background:
+    linear-gradient(145deg, rgba(36, 120, 109, 0.12), transparent 38%),
+    linear-gradient(315deg, rgba(196, 132, 36, 0.13), transparent 42%),
+    var(--paper);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  min-height: 100svh;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(22px, env(safe-area-inset-bottom));
+}
+
+.screen {
+  display: none;
+  min-height: calc(100svh - 40px);
+}
+
+.screen.is-active {
+  display: flex;
+}
+
+.screen-menu {
+  flex-direction: column;
+  gap: 22px;
+  justify-content: space-between;
+}
+
+.brand-row,
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand-row {
+  padding-top: 8px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 560px;
+  margin-bottom: 0;
+  font-size: clamp(2.25rem, 12vw, 4.9rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.score-pill,
+.timer {
+  min-width: 76px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.78);
+  padding: 10px 12px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(43, 35, 22, 0.08);
+}
+
+.score-pill span,
+.stat-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.score-pill strong,
+.timer {
+  font-size: 1.34rem;
+  font-weight: 900;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mode-card {
+  display: grid;
+  min-height: 248px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.78), rgba(255, 250, 241, 0.92)),
+    var(--panel);
+  color: var(--ink);
+  padding: 20px;
+  text-align: left;
+  box-shadow: var(--shadow);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.mode-card:active {
+  transform: scale(0.98);
+}
+
+.mode-card:focus-visible,
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.icon-button:focus-visible,
+.choice-button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(36, 120, 109, 0.38);
+  outline-offset: 3px;
+}
+
+.mode-kana {
+  align-self: start;
+  color: var(--plum);
+  font-size: clamp(3.8rem, 20vw, 8.4rem);
+  font-weight: 900;
+  line-height: 0.85;
+}
+
+.mode-title {
+  align-self: end;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.mode-meta {
+  align-self: end;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.study-band {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.7);
+  padding: 10px;
+}
+
+.study-strip {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.study-tile {
+  min-width: 0;
+  border-radius: 6px;
+  background: rgba(221, 233, 229, 0.76);
+  padding: 8px 2px;
+  text-align: center;
+}
+
+.study-tile b {
+  display: block;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.study-tile span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.screen-game {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.game-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: -2px -18px 0;
+  padding: max(10px, env(safe-area-inset-top)) 18px 10px;
+  background: rgba(247, 243, 234, 0.92);
+  backdrop-filter: blur(18px);
+}
+
+.icon-button {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.game-title-block {
+  min-width: 0;
+  flex: 1;
+}
+
+.game-title-block h2 {
+  margin-bottom: 0;
+  overflow: hidden;
+  font-size: 1.32rem;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer {
+  min-width: 76px;
+  background: var(--ink);
+  color: white;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stat-row > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.72);
+  padding: 10px;
+  text-align: center;
+}
+
+.stat-row strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.play-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+
+.prompt-card {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.prompt {
+  color: var(--plum);
+  font-size: clamp(5.8rem, 34vw, 14rem);
+  font-weight: 950;
+  line-height: 0.88;
+}
+
+.prompt-sub {
+  align-self: start;
+  min-height: 24px;
+  margin-top: -22px;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.answer-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.answer-form[hidden],
+.choice-grid[hidden] {
+  display: none;
+}
+
+input {
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  padding: 0 16px;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 54px;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-weight: 900;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: white;
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.choice-button {
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: clamp(1.55rem, 8vw, 2.7rem);
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(43, 35, 22, 0.07);
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.choice-button:active {
+  transform: scale(0.95);
+}
+
+.choice-button.is-right {
+  background: var(--right);
+  color: white;
+}
+
+.choice-button.is-wrong {
+  background: var(--wrong);
+  color: white;
+}
+
+.feedback {
+  min-height: 28px;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.feedback.is-right {
+  color: var(--right);
+}
+
+.feedback.is-wrong {
+  color: var(--wrong);
+}
+
+.screen-result {
+  align-items: center;
+  justify-content: center;
+}
+
+.result-card {
+  width: min(100%, 430px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.result-card h2 {
+  margin-bottom: 8px;
+  font-size: 3rem;
+  line-height: 0.95;
+}
+
+.result-copy {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 620px) {
+  .app-shell {
+    padding-inline: 14px;
+  }
+
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-card {
+    min-height: 172px;
+  }
+
+  .study-strip {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .answer-form {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-grid {
+    gap: 6px;
+  }
+
+  .game-title-block h2 {
+    font-size: 1.08rem;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <main class="app-shell" id="app">
+      <section class="screen screen-menu is-active" id="menuScreen" aria-labelledby="appTitle">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Katakana Dash</p>
+            <h1 id="appTitle">One minute. Sharp recall.</h1>
+          </div>
+          <div class="score-pill">
+            <span>Best</span>
+            <strong id="overallBest">0</strong>
+          </div>
+        </div>
+
+        <div class="mode-grid" aria-label="Game modes">
+          <button class="mode-card" type="button" data-start-mode="type">
+            <span class="mode-kana">ア</span>
+            <span class="mode-title">Kana to Romaji</span>
+            <span class="mode-meta">High score <strong id="typeBest">0</strong></span>
+          </button>
+          <button class="mode-card" type="button" data-start-mode="pick">
+            <span class="mode-kana">ka</span>
+            <span class="mode-title">Romaji to Kana</span>
+            <span class="mode-meta">High score <strong id="pickBest">0</strong></span>
+          </button>
+        </div>
+
+        <div class="study-band" aria-label="Katakana reference">
+          <div class="study-strip" id="studyStrip"></div>
+        </div>
+      </section>
+
+      <section class="screen screen-game" id="gameScreen" aria-live="polite">
+        <header class="game-header">
+          <button class="icon-button" id="backButton" type="button" aria-label="Back to menu">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <div class="game-title-block">
+            <p class="eyebrow" id="modeLabel">Mode</p>
+            <h2 id="promptLabel">Prompt</h2>
+          </div>
+          <div class="timer" id="timer" aria-label="Time remaining">1:00</div>
+        </header>
+
+        <div class="stat-row" aria-label="Current stats">
+          <div>
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span>Best</span>
+            <strong id="modeBest">0</strong>
+          </div>
+          <div>
+            <span>Streak</span>
+            <strong id="streak">0</strong>
+          </div>
+        </div>
+
+        <section class="play-panel" id="playPanel">
+          <div class="prompt-card">
+            <div class="prompt" id="prompt">ア</div>
+            <div class="prompt-sub" id="promptSub">a</div>
+          </div>
+
+          <form class="answer-form" id="answerForm" autocomplete="off">
+            <input
+              id="answerInput"
+              name="answer"
+              type="text"
+              inputmode="text"
+              autocapitalize="none"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              aria-label="Romaji answer"
+              maxlength="8"
+            />
+            <button class="primary-button" type="submit">Check</button>
+          </form>
+
+          <div class="choice-grid" id="choiceGrid" aria-label="Katakana choices"></div>
+        </section>
+
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+
+      <section class="screen screen-result" id="resultScreen" aria-labelledby="resultTitle">
+        <div class="result-card">
+          <p class="eyebrow" id="resultMode">Round complete</p>
+          <h2 id="resultTitle">Score 0</h2>
+          <p class="result-copy" id="resultCopy">Best score 0</p>
+          <div class="result-actions">
+            <button class="primary-button" id="playAgainButton" type="button">Play Again</button>
+            <button class="secondary-button" id="menuButton" type="button">Menu</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+const KANA = [
+  { kana: "ア", romaji: ["a"] },
+  { kana: "イ", romaji: ["i"] },
+  { kana: "ウ", romaji: ["u"] },
+  { kana: "エ", romaji: ["e"] },
+  { kana: "オ", romaji: ["o"] },
+  { kana: "カ", romaji: ["ka"] },
+  { kana: "キ", romaji: ["ki"] },
+  { kana: "ク", romaji: ["ku"] },
+  { kana: "ケ", romaji: ["ke"] },
+  { kana: "コ", romaji: ["ko"] },
+  { kana: "サ", romaji: ["sa"] },
+  { kana: "シ", romaji: ["shi", "si"] },
+  { kana: "ス", romaji: ["su"] },
+  { kana: "セ", romaji: ["se"] },
+  { kana: "ソ", romaji: ["so"] },
+  { kana: "タ", romaji: ["ta"] },
+  { kana: "チ", romaji: ["chi", "ti"] },
+  { kana: "ツ", romaji: ["tsu", "tu"] },
+  { kana: "テ", romaji: ["te"] },
+  { kana: "ト", romaji: ["to"] },
+  { kana: "ナ", romaji: ["na"] },
+  { kana: "ニ", romaji: ["ni"] },
+  { kana: "ヌ", romaji: ["nu"] },
+  { kana: "ネ", romaji: ["ne"] },
+  { kana: "ノ", romaji: ["no"] },
+  { kana: "ハ", romaji: ["ha"] },
+  { kana: "ヒ", romaji: ["hi"] },
+  { kana: "フ", romaji: ["fu", "hu"] },
+  { kana: "ヘ", romaji: ["he"] },
+  { kana: "ホ", romaji: ["ho"] },
+  { kana: "マ", romaji: ["ma"] },
+  { kana: "ミ", romaji: ["mi"] },
+  { kana: "ム", romaji: ["mu"] },
+  { kana: "メ", romaji: ["me"] },
+  { kana: "モ", romaji: ["mo"] },
+  { kana: "ヤ", romaji: ["ya"] },
+  { kana: "ユ", romaji: ["yu"] },
+  { kana: "ヨ", romaji: ["yo"] },
+  { kana: "ラ", romaji: ["ra"] },
+  { kana: "リ", romaji: ["ri"] },
+  { kana: "ル", romaji: ["ru"] },
+  { kana: "レ", romaji: ["re"] },
+  { kana: "ロ", romaji: ["ro"] },
+  { kana: "ワ", romaji: ["wa"] },
+  { kana: "ヲ", romaji: ["wo", "o"] },
+  { kana: "ン", romaji: ["n"] },
+  { kana: "ガ", romaji: ["ga"] },
+  { kana: "ギ", romaji: ["gi"] },
+  { kana: "グ", romaji: ["gu"] },
+  { kana: "ゲ", romaji: ["ge"] },
+  { kana: "ゴ", romaji: ["go"] },
+  { kana: "ザ", romaji: ["za"] },
+  { kana: "ジ", romaji: ["ji", "zi"] },
+  { kana: "ズ", romaji: ["zu"] },
+  { kana: "ゼ", romaji: ["ze"] },
+  { kana: "ゾ", romaji: ["zo"] },
+  { kana: "ダ", romaji: ["da"] },
+  { kana: "ヂ", romaji: ["di", "ji"] },
+  { kana: "ヅ", romaji: ["du", "zu"] },
+  { kana: "デ", romaji: ["de"] },
+  { kana: "ド", romaji: ["do"] },
+  { kana: "バ", romaji: ["ba"] },
+  { kana: "ビ", romaji: ["bi"] },
+  { kana: "ブ", romaji: ["bu"] },
+  { kana: "ベ", romaji: ["be"] },
+  { kana: "ボ", romaji: ["bo"] },
+  { kana: "パ", romaji: ["pa"] },
+  { kana: "ピ", romaji: ["pi"] },
+  { kana: "プ", romaji: ["pu"] },
+  { kana: "ペ", romaji: ["pe"] },
+  { kana: "ポ", romaji: ["po"] },
+];
+
+const ROUND_SECONDS = 60;
+const SCORE_KEY = "katakana-dash-scores";
+
+const screens = {
+  menu: document.querySelector("#menuScreen"),
+  game: document.querySelector("#gameScreen"),
+  result: document.querySelector("#resultScreen"),
+};
+
+const els = {
+  overallBest: document.querySelector("#overallBest"),
+  typeBest: document.querySelector("#typeBest"),
+  pickBest: document.querySelector("#pickBest"),
+  studyStrip: document.querySelector("#studyStrip"),
+  modeLabel: document.querySelector("#modeLabel"),
+  promptLabel: document.querySelector("#promptLabel"),
+  timer: document.querySelector("#timer"),
+  score: document.querySelector("#score"),
+  modeBest: document.querySelector("#modeBest"),
+  streak: document.querySelector("#streak"),
+  prompt: document.querySelector("#prompt"),
+  promptSub: document.querySelector("#promptSub"),
+  answerForm: document.querySelector("#answerForm"),
+  answerInput: document.querySelector("#answerInput"),
+  choiceGrid: document.querySelector("#choiceGrid"),
+  feedback: document.querySelector("#feedback"),
+  resultMode: document.querySelector("#resultMode"),
+  resultTitle: document.querySelector("#resultTitle"),
+  resultCopy: document.querySelector("#resultCopy"),
+};
+
+let activeMode = "type";
+let activePrompt = null;
+let score = 0;
+let streak = 0;
+let timeLeft = ROUND_SECONDS;
+let timerId = null;
+let scores = loadScores();
+let acceptingAnswers = false;
+let lastPromptKana = "";
+
+function loadScores() {
+  try {
+    return { type: 0, pick: 0, ...JSON.parse(localStorage.getItem(SCORE_KEY)) };
+  } catch {
+    return { type: 0, pick: 0 };
+  }
+}
+
+function saveScores() {
+  localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
+}
+
+function showScreen(name) {
+  Object.values(screens).forEach((screen) => screen.classList.remove("is-active"));
+  screens[name].classList.add("is-active");
+}
+
+function updateScoreboards() {
+  els.typeBest.textContent = scores.type;
+  els.pickBest.textContent = scores.pick;
+  els.overallBest.textContent = Math.max(scores.type, scores.pick);
+  els.modeBest.textContent = scores[activeMode] ?? 0;
+}
+
+function setupStudyStrip() {
+  const preview = KANA.slice(0, 46);
+  els.studyStrip.replaceChildren(
+    ...preview.map((item) => {
+      const tile = document.createElement("div");
+      tile.className = "study-tile";
+
+      const kana = document.createElement("b");
+      kana.textContent = item.kana;
+
+      const romaji = document.createElement("span");
+      romaji.textContent = item.romaji[0];
+
+      tile.append(kana, romaji);
+      return tile;
+    }),
+  );
+}
+
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function randomKana(exceptKana = "") {
+  let next = KANA[Math.floor(Math.random() * KANA.length)];
+  if (KANA.length > 1) {
+    while (next.kana === exceptKana) {
+      next = KANA[Math.floor(Math.random() * KANA.length)];
+    }
+  }
+  return next;
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = String(seconds % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+}
+
+function setFeedback(message, tone = "") {
+  els.feedback.textContent = message;
+  els.feedback.className = `feedback${tone ? ` is-${tone}` : ""}`;
+}
+
+function startGame(mode) {
+  activeMode = mode;
+  score = 0;
+  streak = 0;
+  timeLeft = ROUND_SECONDS;
+  acceptingAnswers = true;
+  lastPromptKana = "";
+
+  clearInterval(timerId);
+  updateScoreboards();
+  updateStats();
+
+  els.modeLabel.textContent = mode === "type" ? "Kana to Romaji" : "Romaji to Kana";
+  els.promptLabel.textContent = mode === "type" ? "Type the romaji" : "Choose the katakana";
+  els.answerForm.hidden = mode !== "type";
+  els.choiceGrid.hidden = mode !== "pick";
+  els.timer.textContent = formatTime(timeLeft);
+  setFeedback("");
+  showScreen("game");
+  nextPrompt();
+
+  timerId = setInterval(() => {
+    timeLeft -= 1;
+    els.timer.textContent = formatTime(Math.max(timeLeft, 0));
+    if (timeLeft <= 0) {
+      finishGame();
+    }
+  }, 1000);
+}
+
+function updateStats() {
+  els.score.textContent = score;
+  els.streak.textContent = streak;
+  els.modeBest.textContent = scores[activeMode] ?? 0;
+}
+
+function nextPrompt() {
+  activePrompt = randomKana(lastPromptKana);
+  lastPromptKana = activePrompt.kana;
+
+  if (activeMode === "type") {
+    els.prompt.textContent = activePrompt.kana;
+    els.promptSub.textContent = "";
+    els.answerInput.value = "";
+    window.setTimeout(() => els.answerInput.focus({ preventScroll: true }), 50);
+  } else {
+    els.prompt.textContent = activePrompt.romaji[0];
+    els.promptSub.textContent = "";
+    renderChoices(activePrompt);
+  }
+}
+
+function renderChoices(correct) {
+  const distractors = shuffle(KANA.filter((item) => item.kana !== correct.kana)).slice(0, 24);
+  const choices = shuffle([correct, ...distractors]);
+
+  els.choiceGrid.replaceChildren(
+    ...choices.map((item) => {
+      const button = document.createElement("button");
+      button.className = "choice-button";
+      button.type = "button";
+      button.textContent = item.kana;
+      button.setAttribute("aria-label", item.kana);
+      button.addEventListener("click", () => handlePick(item, button));
+      return button;
+    }),
+  );
+}
+
+function normalizeAnswer(value) {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function awardPoint() {
+  streak += 1;
+  score += 1 + Math.floor(streak / 5);
+  if (score > scores[activeMode]) {
+    scores[activeMode] = score;
+    saveScores();
+  }
+  updateScoreboards();
+  updateStats();
+}
+
+function handleMiss(correctText) {
+  streak = 0;
+  updateStats();
+  setFeedback(`Answer: ${correctText}`, "wrong");
+}
+
+function handleTypeSubmit(event) {
+  event.preventDefault();
+  if (!acceptingAnswers || activeMode !== "type") return;
+
+  const answer = normalizeAnswer(els.answerInput.value);
+  if (!answer) return;
+
+  if (activePrompt.romaji.includes(answer)) {
+    awardPoint();
+    setFeedback("Correct", "right");
+  } else {
+    handleMiss(activePrompt.romaji[0]);
+  }
+  nextPrompt();
+}
+
+function handlePick(choice, button) {
+  if (!acceptingAnswers || activeMode !== "pick") return;
+  acceptingAnswers = false;
+
+  const isCorrect = choice.kana === activePrompt.kana;
+  if (isCorrect) {
+    button.classList.add("is-right");
+    awardPoint();
+    setFeedback("Correct", "right");
+  } else {
+    button.classList.add("is-wrong");
+    handleMiss(activePrompt.kana);
+    const rightButton = [...els.choiceGrid.children].find(
+      (child) => child.textContent === activePrompt.kana,
+    );
+    rightButton?.classList.add("is-right");
+  }
+
+  window.setTimeout(() => {
+    acceptingAnswers = true;
+    nextPrompt();
+  }, isCorrect ? 180 : 520);
+}
+
+function finishGame() {
+  clearInterval(timerId);
+  acceptingAnswers = false;
+  saveScores();
+  updateScoreboards();
+
+  els.resultMode.textContent = activeMode === "type" ? "Kana to Romaji" : "Romaji to Kana";
+  els.resultTitle.textContent = `Score ${score}`;
+  els.resultCopy.textContent = `Best score ${scores[activeMode]}`;
+  showScreen("result");
+}
+
+function backToMenu() {
+  clearInterval(timerId);
+  acceptingAnswers = false;
+  updateScoreboards();
+  showScreen("menu");
+}
+
+document.querySelectorAll("[data-start-mode]").forEach((button) => {
+  button.addEventListener("click", () => startGame(button.dataset.startMode));
+});
+
+document.querySelector("#backButton").addEventListener("click", backToMenu);
+document.querySelector("#menuButton").addEventListener("click", backToMenu);
+document.querySelector("#playAgainButton").addEventListener("click", () => startGame(activeMode));
+els.answerForm.addEventListener("submit", handleTypeSubmit);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && screens.game.classList.contains("is-active")) {
+    finishGame();
+  }
+});
+
+setupStudyStrip();
+updateScoreboards();
+
+    </script>
+  </body>
+</html>

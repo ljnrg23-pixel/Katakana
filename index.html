@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f3ea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Katakana Dash" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Katakana Dash</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" id="app">
+      <section class="screen screen-menu is-active" id="menuScreen" aria-labelledby="appTitle">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Katakana Dash</p>
+            <h1 id="appTitle">One minute. Sharp recall.</h1>
+          </div>
+          <div class="score-pill">
+            <span>Best</span>
+            <strong id="overallBest">0</strong>
+          </div>
+        </div>
+
+        <div class="mode-grid" aria-label="Game modes">
+          <button class="mode-card" type="button" data-start-mode="type">
+            <span class="mode-kana">ア</span>
+            <span class="mode-title">Kana to Romaji</span>
+            <span class="mode-meta">High score <strong id="typeBest">0</strong></span>
+          </button>
+          <button class="mode-card" type="button" data-start-mode="pick">
+            <span class="mode-kana">ka</span>
+            <span class="mode-title">Romaji to Kana</span>
+            <span class="mode-meta">High score <strong id="pickBest">0</strong></span>
+          </button>
+        </div>
+
+        <div class="study-band" aria-label="Katakana reference">
+          <div class="study-strip" id="studyStrip"></div>
+        </div>
+      </section>
+
+      <section class="screen screen-game" id="gameScreen" aria-live="polite">
+        <header class="game-header">
+          <button class="icon-button" id="backButton" type="button" aria-label="Back to menu">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <div class="game-title-block">
+            <p class="eyebrow" id="modeLabel">Mode</p>
+            <h2 id="promptLabel">Prompt</h2>
+          </div>
+          <div class="timer" id="timer" aria-label="Time remaining">1:00</div>
+        </header>
+
+        <div class="stat-row" aria-label="Current stats">
+          <div>
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span>Best</span>
+            <strong id="modeBest">0</strong>
+          </div>
+          <div>
+            <span>Streak</span>
+            <strong id="streak">0</strong>
+          </div>
+        </div>
+
+        <section class="play-panel" id="playPanel">
+          <div class="prompt-card">
+            <div class="prompt" id="prompt">ア</div>
+            <div class="prompt-sub" id="promptSub">a</div>
+          </div>
+
+          <form class="answer-form" id="answerForm" autocomplete="off">
+            <input
+              id="answerInput"
+              name="answer"
+              type="text"
+              inputmode="text"
+              autocapitalize="none"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              aria-label="Romaji answer"
+              maxlength="8"
+            />
+            <button class="primary-button" type="submit">Check</button>
+          </form>
+
+          <div class="choice-grid" id="choiceGrid" aria-label="Katakana choices"></div>
+        </section>
+
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+
+      <section class="screen screen-result" id="resultScreen" aria-labelledby="resultTitle">
+        <div class="result-card">
+          <p class="eyebrow" id="resultMode">Round complete</p>
+          <h2 id="resultTitle">Score 0</h2>
+          <p class="result-copy" id="resultCopy">Best score 0</p>
+          <div class="result-actions">
+            <button class="primary-button" id="playAgainButton" type="button">Play Again</button>
+            <button class="secondary-button" id="menuButton" type="button">Menu</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
