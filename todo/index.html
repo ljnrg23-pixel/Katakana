@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My To-Do List</h1>
+            <p class="subtitle">Stay organized and productive</p>
+        </header>
+
+        <div class="input-section">
+            <form id="todoForm">
+                <input
+                    type="text"
+                    id="todoInput"
+                    class="todo-input"
+                    placeholder="Add a new task..."
+                    autocomplete="off"
+                    required
+                />
+                <button type="submit" class="add-btn">Add Task</button>
+            </form>
+        </div>
+
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+
+        <ul id="todoList" class="todo-list"></ul>
+
+        <div class="stats-section">
+            <span id="taskCount" class="task-count">0 tasks</span>
+            <button id="clearBtn" class="clear-btn">Clear Completed</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
